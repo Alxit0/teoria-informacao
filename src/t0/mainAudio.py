@@ -40,12 +40,19 @@ def visualizacaoGrafica(data:np.ndarray, fs:int, tini=0, tfim=-1):
 
 	plt.show()
 
+def adicionarRuido(sinal:np.ndarray, amplitude:float):
+
+	ruido = np.random.rand(*sinal.shape) * amplitude
+
+	return sinal + ruido
+
 def main():
 	filename = './files/drumloop.wav'
 
 	fs, data = wavfile.read(filename)
 
 	visualizacaoGrafica(data, fs)
+	visualizacaoGrafica(adicionarRuido(data, 2), fs)
 
 if __name__ == "__main__":
 	main()
