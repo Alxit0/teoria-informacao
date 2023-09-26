@@ -10,10 +10,18 @@ def apresentarInfo(nomeFicheiro, fs, nrBitsQuant):
 	print(f'Taxa de amostragem: {fs}')
 	print(f'Quantização: {nrBitsQuant}')
 
-def visualizacaoGrafica(data, fs):
-	eixo_x = [i/fs for i in range(len(data))]
-	eixo_y_e = data[:,0]/np.max(np.abs(data))
-	eixo_y_d = data[:,0]/np.max(np.abs(data))
+def visualizacaoGrafica(data:np.ndarray, fs:int, tini=0, tfim=-1):
+	
+	if tfim != -1:
+		data = data[tini*fs:tfim*fs]
+	else:
+		data = data[tini*fs:]
+	
+	data_max = np.max(np.abs(data))
+
+	eixo_x = [i/fs for i in range(data.size)]
+	eixo_y_e = data[:,0]/data_max
+	eixo_y_d = data[:,0]/data_max
 
 	plt.figure(1)
 	plt.subplot(211)
