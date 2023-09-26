@@ -19,7 +19,7 @@ def visualizacaoGrafica(data:np.ndarray, fs:int, tini=0, tfim=-1):
 
 	eixo_x = [i/fs for i in range(len(data))]
 	eixo_y_e = data[:,0]/data_max
-	eixo_y_d = data[:,0]/data_max
+	eixo_y_d = data[:,1]/data_max
 
 	plt.figure(1)
 	plt.subplot(211)
