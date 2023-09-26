@@ -10,14 +10,21 @@ def apresentarInfo(nomeFicheiro, fs, nrBitsQuant):
 	print(f'Taxa de amostragem: {fs}')
 	print(f'Quantização: {nrBitsQuant}')
 
-def visualizacaoGrafica(data, fs):
+def visualizacaoGrafica(data:np.ndarray, fs:int, tini=0, tfim=-1):
+
+	if tfim == -1:
+		tfim = len(data)/fs
+
+	data_max = np.max(np.abs(data))
+
 	eixo_x = [i/fs for i in range(len(data))]
-	eixo_y_e = data[:,0]/np.max(np.abs(data))
-	eixo_y_d = data[:,0]/np.max(np.abs(data))
+	eixo_y_e = data[:,0]/data_max
+	eixo_y_d = data[:,1]/data_max
 
 	plt.figure(1)
 	plt.subplot(211)
 	plt.plot(eixo_x, eixo_y_e)
+	plt.axis([tini, tfim, -1, 1])
 	plt.xlabel('Tempo [s]')
 	plt.ylabel('Amplitude [-1:1]')
 	plt.title('Canal Esquerdo')
@@ -25,6 +32,7 @@ def visualizacaoGrafica(data, fs):
 	
 	plt.subplot(212)
 	plt.plot(eixo_x, eixo_y_d)
+	plt.axis([tini, tfim, -1, 1])
 	plt.xlabel('Tempo [s]')
 	plt.ylabel('Amplitude [-1:1]')
 	plt.title('Canal Direito')
@@ -32,12 +40,19 @@ def visualizacaoGrafica(data, fs):
 
 	plt.show()
 
+def adicionarRuido(sinal:np.ndarray, amplitude:float):
+
+	ruido = np.random.rand(*sinal.shape) * amplitude
+
+	return sinal + ruido
+
 def main():
 	filename = './files/drumloop.wav'
 
 	fs, data = wavfile.read(filename)
 
 	visualizacaoGrafica(data, fs)
+	visualizacaoGrafica(adicionarRuido(data, 2), fs)
 
 if __name__ == "__main__":
 	main()
