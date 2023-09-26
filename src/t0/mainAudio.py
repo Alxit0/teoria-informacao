@@ -11,12 +11,10 @@ def apresentarInfo(nomeFicheiro, fs, nrBitsQuant):
 	print(f'Quantização: {nrBitsQuant}')
 
 def visualizacaoGrafica(data:np.ndarray, fs:int, tini=0, tfim=-1):
-	
-	if tfim != -1:
-		data = data[tini*fs:tfim*fs]
-	else:
-		data = data[tini*fs:]
-	
+
+	if tfim == -1:
+		tfim = len(data)/fs
+
 	data_max = np.max(np.abs(data))
 
 	eixo_x = [i/fs for i in range(len(data))]
@@ -26,6 +24,7 @@ def visualizacaoGrafica(data:np.ndarray, fs:int, tini=0, tfim=-1):
 	plt.figure(1)
 	plt.subplot(211)
 	plt.plot(eixo_x, eixo_y_e)
+	plt.axis([tini, tfim, -1, 1])
 	plt.xlabel('Tempo [s]')
 	plt.ylabel('Amplitude [-1:1]')
 	plt.title('Canal Esquerdo')
@@ -33,6 +32,7 @@ def visualizacaoGrafica(data:np.ndarray, fs:int, tini=0, tfim=-1):
 	
 	plt.subplot(212)
 	plt.plot(eixo_x, eixo_y_d)
+	plt.axis([tini, tfim, -1, 1])
 	plt.xlabel('Tempo [s]')
 	plt.ylabel('Amplitude [-1:1]')
 	plt.title('Canal Direito')
