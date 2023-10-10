@@ -1,25 +1,12 @@
 import matplotlib.pyplot as plt
-import numpy as np
 
-# Some example data to display
-x = np.linspace(0, 2 * np.pi, 400)
-y = np.sin(x ** 2)
+histogram_data = {1: 10, 2: 15, 4: 30}
 
-fig, axs = plt.subplots(2, 2)
-axs[0, 0].plot(x, y)
-axs[0, 0].set_title('Axis [0, 0]')
-axs[0, 1].plot(x, y, 'tab:orange')
-axs[0, 1].set_title('Axis [0, 1]')
-axs[1, 0].plot(x, -y, 'tab:green')
-axs[1, 0].set_title('Axis [1, 0]')
-axs[1, 1].plot(x, -y, 'tab:red')
-axs[1, 1].set_title('Axis [1, 1]')
+bins = list(histogram_data.keys())
+frequencies = list(histogram_data.values())
 
-for ax in axs.flat:
-    ax.set(xlabel='x-label', ylabel='y-label')
+plt.bar(bins, frequencies, align='center')
 
-# Hide x labels and tick labels for top plots and y ticks for right plots.
-for ax in axs.flat:
-    ax.label_outer()
+plt.xticks()
 
 plt.show()
