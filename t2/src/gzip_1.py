@@ -181,8 +181,7 @@ class GZIP:
 
 			# ex4
 			print("="*40)
-
-			comprimentos_codigos_literais = metodos.ex4_comprimentos_literais(self, hft, HLIT)
+			comprimentos_codigos_literais = metodos.ex4(self, hft, HLIT)
 
 			# update number of blocks read
 			numBlocks += 1

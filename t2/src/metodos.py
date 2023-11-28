@@ -43,21 +43,24 @@ def ex3(comprimentos_dos_codigos: List[int], verbose: bool = False) -> HuffmanTr
 		anterior em códigos de Huffman
 	
 	Returns:
-		HuffmanTree: arvore de huffamn
+		HuffmanTree: arvore de huffman
 	"""
-	MAX_BITS = max(comprimentos_dos_codigos)
 	
+	# retirar contagem dos diferentes comprimentos dos codigos
+	MAX_BITS = max(comprimentos_dos_codigos)
 	bl_count = []
 	for i in range(MAX_BITS+1):
 		bl_count.append(comprimentos_dos_codigos.count(i))
 	bl_count[0] = 0
 
+	# obter os codigos iniciais para cada comprimento
 	code = 0
 	codigos_iniciais = []
 	for bits in range(1, MAX_BITS+1):
 		code = (code + bl_count[bits-1]) << 1
 		codigos_iniciais.append(code)
 	
+	# obter todos os codigos de huffman
 	codigos_de_huffman = []
 	for i, j in enumerate(bl_count):
 		for k in range(j):
@@ -72,7 +75,6 @@ def ex3(comprimentos_dos_codigos: List[int], verbose: bool = False) -> HuffmanTr
 		ordenado[j].append(i)
 	
 	ordenado = {i:sorted(j) for i,j in ordenado.items()}
-	print(ordenado)
 	
 	hft = HuffmanTree()
 	for i, j in enumerate(bl_count):
@@ -85,22 +87,51 @@ def ex3(comprimentos_dos_codigos: List[int], verbose: bool = False) -> HuffmanTr
 	return hft
 
 
-def ex4_comprimentos_literais(gzip: GZIP, hft: HuffmanTree, HLIT: int):
+def ex4(gzip: GZIP, hft: HuffmanTree, HLIT: int):
 	def next_indice():
-		cur_code = ''
-		while hft.findNode(cur_code) < 0:
-			cur_code += str(gzip.readBits(1))
+		cur_node = hft.root
 		
-		return hft.findNode(cur_code)
+		while cur_node is not None:
+			if cur_node.left is None and cur_node.right is None:
+				return cur_node.index
+			
+			direction = gzip.readBits(1)
 
+			if direction == 0:
+				cur_node = cur_node.left
+			else:
+				cur_node = cur_node.right
+		
+		# nao encontrou
+		return -1
 
 	resp = []
-
 	idx = 0
 	while idx < HLIT + 257:
-		cur = next_indice()
-		print(cur)
+		indice = next_indice()
+		
+		if indice == 16:
+			# copy the previous code length 3 - 6 times (2 bits of length)
+			for _ in range(gzip.readBits(2)+3):
+				resp.append(resp[-1])
+				idx += 1
 
-		idx+=1
+		elif indice == 17:
+			# repeat a code length of 0 for 3 - 10 times (3 bits of length)
+			for _ in range(gzip.readBits(3)+3):
+				resp.append(0)
+				idx += 1
+
+		elif indice == 18:
+			# repeat a code length of 0 for 11 - 138 times (7 bits of length)
+			for _ in range(gzip.readBits(7)+11):
+				resp.append(0)
+				idx += 1
+
+		else:
+			resp.append(indice)
+			idx+=1
+	
+	return resp
 
 
