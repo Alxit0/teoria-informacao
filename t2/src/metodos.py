@@ -2,6 +2,9 @@ from typing import Dict, List, Tuple
 from gzip_1 import GZIP
 from huffmantree import HuffmanTree, HFNode
 
+CODE_LENGHTS_ORDER = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
+
+
 def ex1(gzip: GZIP, verbose: bool = False) -> Tuple[int, int, int]:
 	"""Método que leia o formato do bloco
 
@@ -39,7 +42,7 @@ def ex2(gzip: GZIP, HCLEN: int, verbose: bool = False) -> List[int]:
 	return comprimentos_dos_codigos
 
 def ex3(comprimentos_dos_codigos: List[int], verbose: bool = False) -> HuffmanTree:
-	"""método que converta os comprimentos dos códigos da alínea \
+	"""Método que converta os comprimentos dos códigos da alínea \
 		anterior em códigos de Huffman
 	
 	Returns:
@@ -61,28 +64,25 @@ def ex3(comprimentos_dos_codigos: List[int], verbose: bool = False) -> HuffmanTr
 		codigos_iniciais.append(code)
 	
 	# obter todos os codigos de huffman
-	codigos_de_huffman = []
-	for i, j in enumerate(bl_count):
-		for k in range(j):
-			codigos_de_huffman.append(bin(codigos_iniciais[i-1]+k)[2:].zfill(i))
-
-	a = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
-	ordenado = {}
-	for i, j in zip(a, comprimentos_dos_codigos):
-		if j not in ordenado:
-			ordenado[j] = []
+	ordenado: Dict[int, List[int]] = {}
+	for ordem, comp in zip(CODE_LENGHTS_ORDER, comprimentos_dos_codigos):
+		if comp not in ordenado:
+			ordenado[comp] = []
 		
-		ordenado[j].append(i)
+		ordenado[comp].append(ordem)
 	
 	ordenado = {i:sorted(j) for i,j in ordenado.items()}
 	
+	# gerar arvore de huffman
 	hft = HuffmanTree()
 	for i, j in enumerate(bl_count):
 		for k in range(j):
-			hft.addNode(bin(codigos_iniciais[i-1]+k)[2:].zfill(i), ordenado[i][k], False)
+			codigo = bin(codigos_iniciais[i-1]+k)[2:].zfill(i)
+			index = ordenado[i][k]
+			hft.addNode(codigo, index, False)
 
-	if verbose:
-		print(f"{codigos_de_huffman = }")
+			if verbose:
+				print(f"{index:<4} {codigo}")
 
 	return hft
 
