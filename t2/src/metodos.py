@@ -1,6 +1,10 @@
-from typing import Dict, List, Tuple
-from gzip_1 import GZIP
+from __future__ import annotations
+from typing import Dict, List, Tuple, TYPE_CHECKING
 from huffmantree import HuffmanTree, HFNode
+
+if TYPE_CHECKING:
+	from gzip_1 import GZIP
+
 
 CODE_LENGHTS_ORDER = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
 
@@ -55,6 +59,7 @@ def ex3(comprimentos_dos_codigos: List[int], verbose: bool = False) -> HuffmanTr
 	for i in range(MAX_BITS+1):
 		bl_count.append(comprimentos_dos_codigos.count(i))
 	bl_count[0] = 0
+	print(bl_count)
 
 	# obter os codigos iniciais para cada comprimento
 	code = 0
@@ -62,6 +67,7 @@ def ex3(comprimentos_dos_codigos: List[int], verbose: bool = False) -> HuffmanTr
 	for bits in range(1, MAX_BITS+1):
 		code = (code + bl_count[bits-1]) << 1
 		codigos_iniciais.append(code)
+	print(codigos_iniciais)
 	
 	# obter todos os codigos de huffman
 	ordenado: Dict[int, List[int]] = {}
@@ -87,7 +93,7 @@ def ex3(comprimentos_dos_codigos: List[int], verbose: bool = False) -> HuffmanTr
 	return hft
 
 
-def ex4(gzip: GZIP, hft: HuffmanTree, HLIT: int):
+def ex4(gzip: GZIP, hft: HuffmanTree, num_of_vals: int):
 	def next_indice():
 		cur_node = hft.root
 		
@@ -107,7 +113,7 @@ def ex4(gzip: GZIP, hft: HuffmanTree, HLIT: int):
 
 	resp = []
 	idx = 0
-	while idx < HLIT + 257:
+	while idx < num_of_vals:
 		indice = next_indice()
 		
 		if indice == 16:
@@ -135,3 +141,6 @@ def ex4(gzip: GZIP, hft: HuffmanTree, HLIT: int):
 	return resp
 
 
+if __name__ == '__main__':
+	ex3((3, 3, 3, 3, 3, 2, 4, 4), True)
+	exit()

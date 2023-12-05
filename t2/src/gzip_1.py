@@ -4,7 +4,7 @@
 
 import sys
 from huffmantree import HuffmanTree
-import metodos
+import metodos as metodos
 
 
 class GZIPHeader:
@@ -168,20 +168,33 @@ class GZIP:
 			# 
 			
 			# ex1
-			print("\n" + "="*40)
-			HLIT, HDIST, HCLEN = metodos.ex1(self, True)
+			HLIT, HDIST, HCLEN = metodos.ex1(self, False)
+		
 
-			#ex2
-			print("="*40)
-			comprimentos_dos_codigos = metodos.ex2(self, HCLEN, True)
+			# Store the CLEN tree's code lens in a pre-determined order 
+			CLENcodeLens = metodos.storeCLENLengths(self, HCLEN)   
+			#print("Code Lengths of indices i from the code length tree:", CLENcodeLens)
+				
+			# Based on the CLEN tree's code lens, define a huffman tree for CLEN
+			HuffmanTreeCLENs = metodos.createHuffmanFromLens(self, CLENcodeLens, verbose=False)
+
+
+			# 4
+			# Store the literal and length tree code lens based on the CLEN tree codes
+			#LITLENcodeLens = self.storeLITLENcodeLens(HLIT, HuffmanTreeCLENs)
+			LITLENcodeLens = metodos.storeTreeCodeLens(self, HLIT + 257, HuffmanTreeCLENs)
+
+			# Define the literal and length huffman tree based on the lengths of it's codes
+			HuffmanTreeLITLEN = metodos.createHuffmanFromLens(self, LITLENcodeLens, verbose=False)
+	
 			
-			# ex3
-			print("="*40)
-			hft = metodos.ex3(comprimentos_dos_codigos, True)
+			# 5
+			# Store the distance tree code lens based on the CLEN tree codes
+			#DISTcodeLens = self.storeDISTcodeLens(HDIST, HuffmanTreeCLENs)
+			DISTcodeLens = metodos.storeTreeCodeLens(self, HDIST + 1, HuffmanTreeCLENs)
 
-			# ex4
-			print("="*40)
-			comprimentos_codigos_literais = metodos.ex4(self, hft, HLIT)
+			# Define the distance huffman tree based on the lengths of it's codes
+			HuffmanTreeDIST = metodos.createHuffmanFromLens(self, DISTcodeLens, verbose=False)
 
 			# update number of blocks read
 			numBlocks += 1
