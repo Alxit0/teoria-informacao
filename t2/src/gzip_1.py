@@ -168,20 +168,35 @@ class GZIP:
 			# 
 			
 			# ex1
-			print("\n" + "="*40)
-			HLIT, HDIST, HCLEN = metodos.ex1(self, True)
-
-			#ex2
-			print("="*40)
-			comprimentos_dos_codigos = metodos.ex2(self, HCLEN, True)
+			print("="*60)
+			HLIT, HDIST, HCLEN = metodos.read_hs_values(self)
+			print(f"{HLIT = }")
+			print(f"{HDIST = }")
+			print(f"{HCLEN = }")
+		
+			# ex2
+			print("="*60)
+			comprimentos_clen = metodos.read_clen_lens(self, HCLEN)
+			print(f"{comprimentos_clen = }")
 			
 			# ex3
-			print("="*40)
-			hft = metodos.ex3(comprimentos_dos_codigos, True)
+			print("="*60)
+			huffman_clen = metodos.create_huftree_from_lens(comprimentos_clen, verbose=True)
 
 			# ex4
-			print("="*40)
-			comprimentos_codigos_literais = metodos.ex4(self, hft, HLIT)
+			print("="*60)
+			comprimentos_lit = metodos.read_hufftree_lens(self, huffman_clen, HLIT + 257)
+			print(f"{comprimentos_lit = }")
+	
+			# ex5
+			print("="*60)
+			comprimentos_dist = metodos.read_hufftree_lens(self, huffman_clen, HDIST + 1)
+			print(f"{comprimentos_dist = }")
+
+			# ex6
+			huffman_lit = metodos.create_huftree_from_lens(comprimentos_lit, verbose=False)
+			huffman_dist = metodos.create_huftree_from_lens(comprimentos_dist, verbose=False)
+
 
 			# update number of blocks read
 			numBlocks += 1
