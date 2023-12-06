@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import Dict, List, Tuple, TYPE_CHECKING
-from huffmantree import HuffmanTree, HFNode
+from typing import List, Tuple, TYPE_CHECKING
+from huffmantree import HuffmanTree
 
 if TYPE_CHECKING:
 	from gzip_1 import GZIP
@@ -8,8 +8,8 @@ if TYPE_CHECKING:
 
 CODE_LENGHTS_ORDER = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
 
-
-def ex1(gzip: GZIP, verbose: bool = False) -> Tuple[int, int, int]:
+# ex1
+def read_hs_values(gzip: GZIP, verbose: bool = False) -> Tuple[int, int, int]:
 	"""Método que leia o formato do bloco
 
 	Returns:
@@ -27,73 +27,63 @@ def ex1(gzip: GZIP, verbose: bool = False) -> Tuple[int, int, int]:
 
 	return HLIT, HDIST, HCLEN
 
-def ex2(gzip: GZIP, HCLEN: int, verbose: bool = False) -> List[int]:
-	"""Método que armazene num array os comprimentos dos códigos do \
-		“alfabeto de comprimentos de códigos”, com base em HCLEN
+# ex2
+def read_clen_lens(gzip: GZIP, HCLEN: int) -> List[int]:
+	"""Stores the code lengths for the code lengths alphabet in an array
 
 	Returns:
-		list: lista de comprimentos dos codigos
+		List[int]: code lengths
 	"""
-
-	comprimentos_dos_codigos = []
-	for _ in range(HCLEN+4):
-		comprimentos_dos_codigos.append(gzip.readBits(3))
 	
-	if verbose:
-		print(f"{comprimentos_dos_codigos = }")
-
-
+	comprimentos_dos_codigos = [0] * 19
+	for i in range(HCLEN+4):
+		comprimentos_dos_codigos[CODE_LENGHTS_ORDER[i]] = gzip.readBits(3)
+	
 	return comprimentos_dos_codigos
 
-def ex3(comprimentos_dos_codigos: List[int], verbose: bool = False) -> HuffmanTree:
-	"""Método que converta os comprimentos dos códigos da alínea \
-		anterior em códigos de Huffman
+# ex3
+def create_huftree_from_lens(comprimentos_dos_codigos: List[int], verbose=False) -> HuffmanTree:
+	"""Takes an array with symbols 'Huffman codes' lengths and returns
+	a formated Huffman tree with said codes
 	
 	Returns:
-		HuffmanTree: arvore de huffman
+		HuffmanTree: huffman tree of codes
 	"""
+
+	max_len = max(comprimentos_dos_codigos)
 	
-	# retirar contagem dos diferentes comprimentos dos codigos
-	MAX_BITS = max(comprimentos_dos_codigos)
-	bl_count = []
-	for i in range(MAX_BITS+1):
-		bl_count.append(comprimentos_dos_codigos.count(i))
+	# calcular a contagem dos diferentes comprimentos dos codigos
+	bl_count = [0] * (max_len+1)
+	for i in comprimentos_dos_codigos:
+		bl_count[i] += 1
 	bl_count[0] = 0
-	print(bl_count)
 
-	# obter os codigos iniciais para cada comprimento
+	# calcular o primeiro codigo para cada comprimento
 	code = 0
-	codigos_iniciais = []
-	for bits in range(1, MAX_BITS+1):
+	next_code = [0 for i in range(max_len+1)]
+	for bits in range(1, max_len+1):
 		code = (code + bl_count[bits-1]) << 1
-		codigos_iniciais.append(code)
-	print(codigos_iniciais)
+		next_code[bits] = code
 	
-	# obter todos os codigos de huffman
-	ordenado: Dict[int, List[int]] = {}
-	for ordem, comp in zip(CODE_LENGHTS_ORDER, comprimentos_dos_codigos):
-		if comp not in ordenado:
-			ordenado[comp] = []
-		
-		ordenado[comp].append(ordem)
+	# criar a arvore de huffman
+	htr = HuffmanTree()
+	for i, lenght in enumerate(comprimentos_dos_codigos):
+		if lenght == 0:
+			continue
+
+		code = bin(next_code[lenght])[2:].zfill(lenght)
+		htr.addNode(code, i, verbose)
+		next_code[lenght] += 1
 	
-	ordenado = {i:sorted(j) for i,j in ordenado.items()}
-	
-	# gerar arvore de huffman
-	hft = HuffmanTree()
-	for i, j in enumerate(bl_count):
-		for k in range(j):
-			codigo = bin(codigos_iniciais[i-1]+k)[2:].zfill(i)
-			index = ordenado[i][k]
-			hft.addNode(codigo, index, False)
+	return htr
 
-			if verbose:
-				print(f"{index:<4} {codigo}")
+# ex4, ex5
+def read_hufftree_lens(gzip: GZIP, hft: HuffmanTree, num_of_vals: int) -> List[int]:
+	"""_summary_
 
-	return hft
-
-
-def ex4(gzip: GZIP, hft: HuffmanTree, num_of_vals: int):
+	Returns:
+		List[int]: _description_
+	"""
 	def next_indice():
 		cur_node = hft.root
 		
@@ -112,35 +102,22 @@ def ex4(gzip: GZIP, hft: HuffmanTree, num_of_vals: int):
 		return -1
 
 	resp = []
-	idx = 0
-	while idx < num_of_vals:
+	while len(resp) < num_of_vals:
 		indice = next_indice()
 		
 		if indice == 16:
 			# copy the previous code length 3 - 6 times (2 bits of length)
-			for _ in range(gzip.readBits(2)+3):
-				resp.append(resp[-1])
-				idx += 1
+			resp.extend([resp[-1]] * (gzip.readBits(2)+3))
 
 		elif indice == 17:
 			# repeat a code length of 0 for 3 - 10 times (3 bits of length)
-			for _ in range(gzip.readBits(3)+3):
-				resp.append(0)
-				idx += 1
+			resp.extend([0] * (gzip.readBits(3)+3))
 
 		elif indice == 18:
 			# repeat a code length of 0 for 11 - 138 times (7 bits of length)
-			for _ in range(gzip.readBits(7)+11):
-				resp.append(0)
-				idx += 1
+			resp.extend([0] * (gzip.readBits(7)+11))
 
 		else:
 			resp.append(indice)
-			idx+=1
 	
 	return resp
-
-
-if __name__ == '__main__':
-	ex3((3, 3, 3, 3, 3, 2, 4, 4), True)
-	exit()

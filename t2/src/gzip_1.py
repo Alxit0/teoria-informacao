@@ -4,7 +4,7 @@
 
 import sys
 from huffmantree import HuffmanTree
-import metodos as metodos
+import metodos
 
 
 class GZIPHeader:
@@ -168,33 +168,35 @@ class GZIP:
 			# 
 			
 			# ex1
-			HLIT, HDIST, HCLEN = metodos.ex1(self, False)
+			print("="*60)
+			HLIT, HDIST, HCLEN = metodos.read_hs_values(self)
+			print(f"{HLIT = }")
+			print(f"{HDIST = }")
+			print(f"{HCLEN = }")
 		
-
-			# Store the CLEN tree's code lens in a pre-determined order 
-			CLENcodeLens = metodos.storeCLENLengths(self, HCLEN)   
-			#print("Code Lengths of indices i from the code length tree:", CLENcodeLens)
-				
-			# Based on the CLEN tree's code lens, define a huffman tree for CLEN
-			HuffmanTreeCLENs = metodos.createHuffmanFromLens(self, CLENcodeLens, verbose=False)
-
-
-			# 4
-			# Store the literal and length tree code lens based on the CLEN tree codes
-			#LITLENcodeLens = self.storeLITLENcodeLens(HLIT, HuffmanTreeCLENs)
-			LITLENcodeLens = metodos.storeTreeCodeLens(self, HLIT + 257, HuffmanTreeCLENs)
-
-			# Define the literal and length huffman tree based on the lengths of it's codes
-			HuffmanTreeLITLEN = metodos.createHuffmanFromLens(self, LITLENcodeLens, verbose=False)
-	
+			# ex2
+			print("="*60)
+			comprimentos_clen = metodos.read_clen_lens(self, HCLEN)
+			print(f"{comprimentos_clen = }")
 			
-			# 5
-			# Store the distance tree code lens based on the CLEN tree codes
-			#DISTcodeLens = self.storeDISTcodeLens(HDIST, HuffmanTreeCLENs)
-			DISTcodeLens = metodos.storeTreeCodeLens(self, HDIST + 1, HuffmanTreeCLENs)
+			# ex3
+			print("="*60)
+			huffman_clen = metodos.create_huftree_from_lens(comprimentos_clen, verbose=True)
 
-			# Define the distance huffman tree based on the lengths of it's codes
-			HuffmanTreeDIST = metodos.createHuffmanFromLens(self, DISTcodeLens, verbose=False)
+			# ex4
+			print("="*60)
+			comprimentos_lit = metodos.read_hufftree_lens(self, huffman_clen, HLIT + 257)
+			print(f"{comprimentos_lit = }")
+	
+			# ex5
+			print("="*60)
+			comprimentos_dist = metodos.read_hufftree_lens(self, huffman_clen, HDIST + 1)
+			print(f"{comprimentos_dist = }")
+
+			# ex6
+			huffman_lit = metodos.create_huftree_from_lens(comprimentos_lit, verbose=False)
+			huffman_dist = metodos.create_huftree_from_lens(comprimentos_dist, verbose=False)
+
 
 			# update number of blocks read
 			numBlocks += 1
