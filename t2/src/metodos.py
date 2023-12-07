@@ -154,7 +154,7 @@ def read_hufftree_lens(gzip: GZIP, hft: HuffmanTree, num_of_vals: int) -> List[i
 	return resp
 
 # ex7
-def decompress_lz77(gzip: GZIP, hft_lit_len:HuffmanTree, hft_dist:HuffmanTree) -> List[int]:
+def decompress_lz77(gzip: GZIP, hft_lit_len:HuffmanTree, hft_dist:HuffmanTree, verbose=False) -> List[int]:
 	"""Descompactação dos dados comprimidos, com base nos códigos de Huffman e no algoritmo LZ77
 
 	Args:
@@ -199,5 +199,8 @@ def decompress_lz77(gzip: GZIP, hft_lit_len:HuffmanTree, hft_dist:HuffmanTree) -
 			# copy the character at index len(output)-distance to the end of the output array
 			for _ in range(length):
 				output.append(output[-distance])
+
+	if verbose:
+		print(*map(chr, output), sep='')
 
 	return output

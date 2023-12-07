@@ -149,6 +149,7 @@ class GZIP:
 		
 		# show filename read from GZIP header
 		print(self.gzh.fName)
+		file_output = open(self.gzh.fName, 'wb')
 		
 		output = []
 		# MAIN LOOP - decode block by block
@@ -199,8 +200,10 @@ class GZIP:
 
 			# ex7
 			print("="*60)
-			output += metodos.decompress_lz77(self, huffman_lit, huffman_dist)
-			print(*map(chr, output), sep='')
+			output = metodos.decompress_lz77(self, huffman_lit, huffman_dist, verbose=True)
+			
+			# ex8
+			file_output.write(bytes(output))
 
 			# update number of blocks read
 			numBlocks += 1
@@ -208,7 +211,7 @@ class GZIP:
 
 		
 		# close file			
-		
+		file_output.close()
 		self.f.close()	
 		print("End: %d block(s) analyzed." % numBlocks)
 	
