@@ -150,7 +150,7 @@ class GZIP:
 		# show filename read from GZIP header
 		print(self.gzh.fName)
 		
-		
+		output = []
 		# MAIN LOOP - decode block by block
 		BFINAL = 0	
 		while not BFINAL == 1:	
@@ -197,6 +197,10 @@ class GZIP:
 			huffman_lit = metodos.create_huftree_from_lens(comprimentos_lit, verbose=False)
 			huffman_dist = metodos.create_huftree_from_lens(comprimentos_dist, verbose=False)
 
+			# ex7
+			print("="*60)
+			output += metodos.decompress_lz77(self, huffman_lit, huffman_dist)
+			print(*map(chr, output), sep='')
 
 			# update number of blocks read
 			numBlocks += 1

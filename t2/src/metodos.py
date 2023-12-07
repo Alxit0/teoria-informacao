@@ -8,6 +8,36 @@ if TYPE_CHECKING:
 
 CODE_LENGHTS_ORDER = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]
 
+# tabela1 Doc2 - pag 10
+EXTRA_BITS_LENGTHS = [
+	(0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8), (0, 9), (0, 10),
+	(1, 11), (1, 13), (1, 15), (1, 17),
+	(2, 19), (2, 23), (2, 27), (2, 31),
+	(3, 35), (3, 43), (3, 51), (3, 59),
+	(4, 67), (4, 83), (4, 99), (4, 115),
+	(5, 131), (5, 163), (5, 195), (5, 227),
+	(0, 258)
+]
+
+# tabela2 Doc2 - pag 10
+EXTRA_BITS_DIST = [
+	(0, 1), (0, 2), (0, 3), (0, 4),
+	(1, 5), (1, 7),
+	(2, 9), (2, 13),
+	(3, 17), (3, 25),
+	(4, 33), (4, 49),
+	(5, 65), (5, 97),
+	(6, 129), (6, 193),
+	(7, 257), (7, 385),
+	(8, 513), (8, 769),
+	(9, 1025), (9, 1537),
+	(10, 2049), (10, 3073),
+	(11, 4097), (11, 6145),
+	(12, 8193), (12, 12289),
+	(13, 16385), (13, 24577)
+]
+
+
 # ex1
 def read_hs_values(gzip: GZIP, verbose: bool = False) -> Tuple[int, int, int]:
 	"""Método que leia o formato do bloco
@@ -78,32 +108,33 @@ def create_huftree_from_lens(comprimentos_dos_codigos: List[int], verbose=False)
 	return htr
 
 # ex4, ex5
+def _get_next_index(gzip: GZIP, hft: HuffmanTree) -> int:
+	cur_node = hft.root
+	
+	while cur_node is not None:
+		if cur_node.left is None and cur_node.right is None:
+			return cur_node.index
+		
+		direction = gzip.readBits(1)
+
+		if direction == 0:
+			cur_node = cur_node.left
+		else:
+			cur_node = cur_node.right
+	
+	# nao encontrou
+	raise Exception('Bit sequance not found in huffman tree')
+
 def read_hufftree_lens(gzip: GZIP, hft: HuffmanTree, num_of_vals: int) -> List[int]:
 	"""_summary_
 
 	Returns:
 		List[int]: _description_
 	"""
-	def next_indice():
-		cur_node = hft.root
-		
-		while cur_node is not None:
-			if cur_node.left is None and cur_node.right is None:
-				return cur_node.index
-			
-			direction = gzip.readBits(1)
-
-			if direction == 0:
-				cur_node = cur_node.left
-			else:
-				cur_node = cur_node.right
-		
-		# nao encontrou
-		return -1
 
 	resp = []
 	while len(resp) < num_of_vals:
-		indice = next_indice()
+		indice = _get_next_index(gzip, hft)
 		
 		if indice == 16:
 			# copy the previous code length 3 - 6 times (2 bits of length)
@@ -121,3 +152,52 @@ def read_hufftree_lens(gzip: GZIP, hft: HuffmanTree, num_of_vals: int) -> List[i
 			resp.append(indice)
 	
 	return resp
+
+# ex7
+def decompress_lz77(gzip: GZIP, hft_lit_len:HuffmanTree, hft_dist:HuffmanTree) -> List[int]:
+	"""Descompactação dos dados comprimidos, com base nos códigos de Huffman e no algoritmo LZ77
+
+	Args:
+		gzip (GZIP): gzip para descomprimir
+		hft_lit_len (HuffmanTree): huffman tree dos literais/tamanhos (lits/lengths)
+		hft_dist (HuffmanTree): huffman tree das distancias
+
+	Returns:
+		List[int]: lista dos valores utf8 dos simbolos descomprimidos
+	"""
+
+	# resp
+	output = []
+
+	while True:
+
+		code_lit_len = _get_next_index(gzip, hft_lit_len)
+
+		# If the code reached is 256, its the end and we terminate the loop
+		if code_lit_len == 256:
+			break
+
+		# If the code reached is in the interval [0, 256[,
+		# just append the value read corresponding a the literal to the output array
+		elif code_lit_len < 256:
+			output.append(code_lit_len)
+
+		# If the code reached is in the interval [257, 285],
+		# it is refering to the length of the string to copy
+		elif code_lit_len > 256:
+			
+			# calculate length
+			readExtra, length = EXTRA_BITS_LENGTHS[code_lit_len - 257]
+			length += gzip.readBits(readExtra)
+
+			# calculate distance
+			code_dist = _get_next_index(gzip, hft_dist)
+			readExtra, distance = EXTRA_BITS_DIST[code_dist]
+			distance += gzip.readBits(readExtra)
+
+			# For each one of the range(length) iterations,
+			# copy the character at index len(output)-distance to the end of the output array
+			for _ in range(length):
+				output.append(output[-distance])
+
+	return output
