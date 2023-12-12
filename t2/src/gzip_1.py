@@ -195,8 +195,8 @@ class GZIP:
 			print(f"{comprimentos_dist = }")
 
 			# ex6
-			huffman_lit = metodos.create_huftree_from_lens(comprimentos_lit, verbose=False)
-			huffman_dist = metodos.create_huftree_from_lens(comprimentos_dist, verbose=False)
+			huffman_lit = metodos.create_huftree_from_lens(comprimentos_lit, verbose=True)
+			huffman_dist = metodos.create_huftree_from_lens(comprimentos_dist, verbose=True)
 
 			# ex7
 			print("="*60)

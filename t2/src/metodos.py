@@ -68,7 +68,7 @@ def read_clen_lens(gzip: GZIP, HCLEN: int) -> List[int]:
 	comprimentos_dos_codigos = [0] * 19
 	for i in range(HCLEN+4):
 		comprimentos_dos_codigos[CODE_LENGHTS_ORDER[i]] = gzip.readBits(3)
-	
+
 	return comprimentos_dos_codigos
 
 # ex3
@@ -109,21 +109,14 @@ def create_huftree_from_lens(comprimentos_dos_codigos: List[int], verbose=False)
 
 # ex4, ex5
 def _get_next_index(gzip: GZIP, hft: HuffmanTree) -> int:
-	cur_node = hft.root
-	
-	while cur_node is not None:
-		if cur_node.left is None and cur_node.right is None:
-			return cur_node.index
-		
-		direction = gzip.readBits(1)
+	hft.resetCurNode()
+	cur_node = -1
 
-		if direction == 0:
-			cur_node = cur_node.left
-		else:
-			cur_node = cur_node.right
+	while cur_node < 0:
+		direction = gzip.readBits(1)
+		cur_node = hft.nextNode(str(direction))
 	
-	# nao encontrou
-	raise Exception('Bit sequance not found in huffman tree')
+	return cur_node
 
 def read_hufftree_lens(gzip: GZIP, hft: HuffmanTree, num_of_vals: int) -> List[int]:
 	"""_summary_
