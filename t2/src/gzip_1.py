@@ -165,7 +165,9 @@ class GZIP:
 			
 									
 			#--- STUDENTS --- ADD CODE HERE
-			# 
+			# - Alexandre Silva Regalado nº2020212059
+			# - João Maria Santos nº2022213725
+			# - Miguel Pinto de Santos nº2022221058
 			# 
 			
 			# ex1
