@@ -162,3 +162,5 @@ cython_debug/
 t0/
 **/.DS_Store
 t2/src/FAQ.txt
+t2/src/gzs/*
+t2/src/sample*

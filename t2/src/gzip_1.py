@@ -200,15 +200,20 @@ class GZIP:
 
 			# ex7
 			print("="*60)
-			output = metodos.decompress_lz77(self, huffman_lit, huffman_dist, verbose=True)
+			output += metodos.decompress_lz77(self, output, huffman_lit, huffman_dist, verbose=True)
 			
 			# ex8
-			file_output.write(bytes(output))
+			# 40960 = max distance asked (24577 + (2**14-1))
+			# final table 2, page 10, doc2
+			if(len(output) > 40960):
+				file_output.write(bytes(output[:-40960]))
+				output = output[-40960:]
 
 			# update number of blocks read
 			numBlocks += 1
 		
 
+		file_output.write(bytes(output))
 		
 		# close file			
 		file_output.close()
