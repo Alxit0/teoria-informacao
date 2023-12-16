@@ -43,7 +43,7 @@ def read_hs_values(gzip: GZIP, verbose: bool = False) -> Tuple[int, int, int]:
 	"""Método que leia o formato do bloco
 
 	Returns:
-		(int, int, int): _description_
+		(int, int, int): HLIT, HDIST, HCLEN
 	"""
 	
 	HLIT = gzip.readBits(5)
@@ -109,6 +109,12 @@ def create_huftree_from_lens(comprimentos_dos_codigos: List[int], verbose=False)
 
 # ex4, ex5
 def _get_next_index(gzip: GZIP, hft: HuffmanTree) -> int:
+	"""Obtem o proximo index de uma huffman tree ao ler bit a bit de um gzip
+
+	Returns:
+		int: valor do index
+	"""
+
 	hft.resetCurNode()
 	cur_node = -1
 
@@ -119,10 +125,10 @@ def _get_next_index(gzip: GZIP, hft: HuffmanTree) -> int:
 	return cur_node
 
 def read_hufftree_lens(gzip: GZIP, hft: HuffmanTree, num_of_vals: int) -> List[int]:
-	"""_summary_
+	"""Le os comprimentos para uma lista de valores.
 
 	Returns:
-		List[int]: _description_
+		List[int]: Lista com os comprimentos
 	"""
 
 	resp = []
